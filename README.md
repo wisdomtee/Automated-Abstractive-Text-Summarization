@@ -29,3 +29,4 @@ Clone the repository:
 
 ```bash
 git clone repository-url
+(Fix Streamlit deployment Python compatibility)
