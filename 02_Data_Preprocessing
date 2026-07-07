@@ -1,0 +1,430 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "b639707c-0b91-4990-adca-dd82a5682423",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# ============================================================\n",
+    "# Project: Automated Abstractive Text Summarization\n",
+    "# Model: Facebook BART Transformer\n",
+    "#\n",
+    "# Notebook 2: Data Preprocessing\n",
+    "# ============================================================"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "1836456f-1d45-4a2e-92e2-107d55db2318",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\27355\\Desktop\\New folder\\Data Science\\Automated-Abstractive-Text-Summarization\\venv\\Lib\\site-packages\\tqdm\\auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html\n",
+      "  from .autonotebook import tqdm as notebook_tqdm\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Libraries imported successfully!\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "from transformers import BartTokenizer\n",
+    "\n",
+    "print(\"✅ Libraries imported successfully!\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "577acaf4-ec03-495c-aac2-c82c229c2545",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>document</th>\n",
+       "      <th>summary</th>\n",
+       "      <th>id</th>\n",
+       "      <th>document_length</th>\n",
+       "      <th>summary_length</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>They recorded their best result in Wales in 30...</td>\n",
+       "      <td>The general election dominated politics in Wal...</td>\n",
+       "      <td>35125421</td>\n",
+       "      <td>578</td>\n",
+       "      <td>25</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>More than 1,500 children were held over allege...</td>\n",
+       "      <td>Children as young as 10 were among hundreds of...</td>\n",
+       "      <td>35915168</td>\n",
+       "      <td>415</td>\n",
+       "      <td>24</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>It includes:\\nCertainly, Sinn Féin leader Gerr...</td>\n",
+       "      <td>A bewildering list of developments has contrib...</td>\n",
+       "      <td>39266547</td>\n",
+       "      <td>635</td>\n",
+       "      <td>20</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Then a young man in his mid-20s, the future mu...</td>\n",
+       "      <td>In March 1959, as Chinese troops crushed an at...</td>\n",
+       "      <td>12700331</td>\n",
+       "      <td>766</td>\n",
+       "      <td>21</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Almost 2,000 homes and more than 1,000 busines...</td>\n",
+       "      <td>A £3m fund to invest in flood prevention and r...</td>\n",
+       "      <td>36713610</td>\n",
+       "      <td>161</td>\n",
+       "      <td>18</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                                            document  \\\n",
+       "0  They recorded their best result in Wales in 30...   \n",
+       "1  More than 1,500 children were held over allege...   \n",
+       "2  It includes:\\nCertainly, Sinn Féin leader Gerr...   \n",
+       "3  Then a young man in his mid-20s, the future mu...   \n",
+       "4  Almost 2,000 homes and more than 1,000 busines...   \n",
+       "\n",
+       "                                             summary        id  \\\n",
+       "0  The general election dominated politics in Wal...  35125421   \n",
+       "1  Children as young as 10 were among hundreds of...  35915168   \n",
+       "2  A bewildering list of developments has contrib...  39266547   \n",
+       "3  In March 1959, as Chinese troops crushed an at...  12700331   \n",
+       "4  A £3m fund to invest in flood prevention and r...  36713610   \n",
+       "\n",
+       "   document_length  summary_length  \n",
+       "0              578              25  \n",
+       "1              415              24  \n",
+       "2              635              20  \n",
+       "3              766              21  \n",
+       "4              161              18  "
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df = pd.read_csv(\"data/xsum_sample.csv\")\n",
+    "\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "b18a6838-3ec6-4e9f-abc7-1fced3959768",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(1000, 5)\n",
+      "<class 'pandas.DataFrame'>\n",
+      "RangeIndex: 1000 entries, 0 to 999\n",
+      "Data columns (total 5 columns):\n",
+      " #   Column           Non-Null Count  Dtype\n",
+      "---  ------           --------------  -----\n",
+      " 0   document         1000 non-null   str  \n",
+      " 1   summary          1000 non-null   str  \n",
+      " 2   id               1000 non-null   int64\n",
+      " 3   document_length  1000 non-null   int64\n",
+      " 4   summary_length   1000 non-null   int64\n",
+      "dtypes: int64(3), str(2)\n",
+      "memory usage: 2.3 MB\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(df.shape)\n",
+    "\n",
+    "df.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "53e2615a-086f-4d5c-b441-1e5fe37b3e72",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ BART tokenizer loaded successfully!\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\27355\\Desktop\\New folder\\Data Science\\Automated-Abstractive-Text-Summarization\\venv\\Lib\\site-packages\\transformers\\tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884\n",
+      "  warnings.warn(\n"
+     ]
+    }
+   ],
+   "source": [
+    "tokenizer = BartTokenizer.from_pretrained(\"facebook/bart-large-cnn\")\n",
+    "\n",
+    "print(\"✅ BART tokenizer loaded successfully!\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "27c3f875-72ca-47f6-8309-fb39a0945ecd",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "They recorded their best result in Wales in 30 years, taking 11 out of 40 seats.\n",
+      "Among them was Gower, which was won by just 27 seats by the former detective Byron Davies, after more than a century in the hands of a succession of Labour MPs.\n",
+      "Jeremy Corbyn should have some fond memories as well.\n",
+      "His extraordinary rise in the summer from rank outsider to Labour leader was a reflection of the party's membership in Wales, as elsewhere.\n",
+      "The subsequent in-fighting in the party after Corbyn's victory could prove a real problem for Welsh Labour as it looks to hold on to power at the assembly next year.\n",
+      "In the meantime, the current Labour Welsh government completed its final full year.\n",
+      "And if there was an issue which dominated in Cardiff Bay, it was once again the state of the NHS.\n",
+      "Opposition parties maintained the pressure on waiting lists and the decision not to protect health spending between 2011 and 2013.\n",
+      "Labour ministers responded by pointing out that all was not rosy in the NHS in England and referring to its direct action such as putting Betsi Cadwaladr University Health Board into special measures.\n",
+      "It was a relatively quiet political year for education.  Although minister Huw Lewis suggested that Welsh GCSE results would overtake England, it failed to materialise as the results in Wales matched the previous year.\n",
+      "Public Services Minister Leighton Andrews failed to get agreement from opposition parties for council re-organisation, which largely recreates the structure that existed in the 1970s and 80s with eight or nine large councils.\n",
+      "Instead, he has ploughed on with legislation to pave the way for the next Welsh government to dramatically reduce the existing 22 councils soon after taking charge, but the big question remains unanswered: can there be political agreement?\n",
+      "David Cameron and Nick Clegg visited the Millennium Stadium for what was called the St David's Day agreement to devolve more powers over energy, transport and elections.\n",
+      "Labour insisted there had been no agreement, and remained cool to much that had been proposed.\n",
+      "This turned into hostility over Tory plans to simplify the constitutional settlement when the First Minister Carwyn Jones accused Welsh Secretary Stephen Crabb of putting devolution into reverse.\n",
+      "The other major constitutional development was the announcement from the Chancellor that partial control of income tax could be devolved without the need for a referendum.\n",
+      "Elsewhere, the Welsh government's plans for an M4 relief road around Newport put internal strain on what is normally a disciplined party.\n",
+      "Labour AM Jenny Rathbone criticised the proposals and was then sacked as chair of a committee at the assembly.\n",
+      "She responded by saying there was an unhealthy culture at the top of the Welsh government which did not allow for rigorous debate.\n",
+      "Her successor on the committee, fellow Labour AM Mick Antoniw, disagreed, saying he had often been critical and had \"not woken up in the morning with a horse's head in my bed\".\n",
+      "The parties in Wales won't have to deal with horses' heads next year, but there are plenty of challenges nevertheless.\n",
+      "Plaid have yet to take advantage of the increased profile of its leader Leanne Wood during the general election leaders' debates, although it helped her win the accolade of Welsh Politician of the Year.\n",
+      "The Lib Dems have to rebuild after a devastating 2015 and UKIP are gearing up for a campaign which could see them with a handful of AMs for the first time.\n"
+     ]
+    }
+   ],
+   "source": [
+    "document = df[\"document\"][0]\n",
+    "\n",
+    "print(document)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "9c703ca7-68c6-4d11-abeb-4d314ac35f73",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'input_ids': tensor([[    0,  1213,  2673,    49,   275,   898,    11,  5295,    11,   389,\n",
+      "           107,     6,   602,   365,    66,     9,   843,  3202,     4, 50118,\n",
+      "         36342,   106,    21,   272,  8285,     6,    61,    21,   351,    30,\n",
+      "            95,   974,  3202,    30,     5,   320, 14104, 16086, 12051,     6,\n",
+      "            71,    55,    87,    10,  3220,    11,     5,  1420,     9,    10,\n",
+      "         15436,     9,  4165,  6714,     4, 50118, 37185, 10113,   197,    33,\n",
+      "           103, 10882,  6180,    25,   157,     4, 50118,  9962,  7116,  1430,\n",
+      "            11,     5,  1035,    31,  7938, 25267,     7,  4165,   884,    21,\n",
+      "            10, 12456,     9,     5,   537,    18,  6332,    11,  5295,     6,\n",
+      "            25,  5140,     4, 50118,   133,  7757,    11,    12, 17329,    11,\n",
+      "             5,   537,    71, 10113,    18,  1124,   115,  3364,    10,   588,\n",
+      "           936,    13, 12093,  4165,    25,    24,  1326,     7,   946,    15,\n",
+      "             7,   476,    23,     5,  6559,   220,    76,     4, 50118,  1121,\n",
+      "             5, 10299,     6,     5,   595,  4165, 12093,   168,  2121,    63,\n",
+      "           507,   455,    76,     4, 50118,  2409,   114,    89,    21,    41,\n",
+      "           696,    61,  6235,    11, 12426,  1501,     6,    24,    21,   683,\n",
+      "           456,     5,   194,     9,     5,  8681,     4, 50118, 39892, 21553,\n",
+      "          1799,  4925,     5,  1164,    15,  2445,  8204,     8,     5,   568,\n",
+      "            45,     7,  1744,   474,  1408,   227,  1466,     8,  1014,     4,\n",
+      "         50118, 38664,  5118,  2334,    30,  7547,    66,    14,    70,    21,\n",
+      "            45,  4533,  8628,    11,     5,  8681,    11,  1156,     8,  5056,\n",
+      "             7,    63,  2228,   814,   215,    25,  2057,   163,  2580,   118,\n",
+      "         15307, 10163, 27968,   589,  1309,  1785,    88,   780,  1797,     4,\n",
+      "         50118,   243,    21,    10,  3487,  5128,   559,    76,    13,  1265,\n",
+      "             4,  1437,  2223,  1269,  8003,   605,  3577,  2528,    14, 12093,\n",
+      "         18397,  3388,   775,    74, 29163,  1156,     6,    24,  1447,     7,\n",
+      "          1468,  1496,    25,     5,   775,    11,  5295,  9184,     5,   986,\n",
+      "            76,     4, 50118, 22649,  1820,   692,  1063, 20684, 13159,  1447,\n",
+      "             7,   120,  1288,    31,  1756,  1799,    13,  1676,   769,    12,\n",
+      "         17247,  3258,     6,    61,  2743,  3872, 12353,   293,     5,  3184,\n",
+      "            14, 13412,    11,     5,  6200,    29,     8,  1812,    29,    19,\n",
+      "           799,    50,  1117,   739, 14751,     4, 50118, 23271,     6,    37,\n",
+      "            34,  2968, 13098,  4183,    15,    19,  2309,     7, 19175,     5,\n",
+      "           169,    13,     5,   220, 12093,   168,     7,  8617,  1888,     5,\n",
+      "          2210,   820, 14751,  1010,    71,   602,  1427,     6,    53,     5,\n",
+      "           380,   864,  1189, 20358,    35,    64,    89,    28,   559,  1288,\n",
+      "           116, 50118,  8773,  5628,     8,  2651,  8388,  6149,  3790,     5,\n",
+      "         22559,  2689,    13,    99,    21,   373,     5,   312,   871,    18,\n",
+      "          1053,  1288,     7,  8709, 18224,    55,  4361,    81,  1007,     6,\n",
+      "          4240,     8,  1727,     4, 50118, 38664,  5294,    89,    56,    57,\n",
+      "           117,  1288,     6,     8,  2442,  3035,     7,   203,    14,    56,\n",
+      "            57,  1850,     4, 50118,   713,  1224,    88, 22069,    81, 10886,\n",
+      "           708,     7, 24778,     5,  6100,  4221,    77,     5,  1234,   692,\n",
+      "          1653, 16541,  1454,  1238, 12093,  1863,  3259,  5309,  8448,     9,\n",
+      "          2057,  8709, 23794,    88,  7213,     4, 50118,   133,    97,   538,\n",
+      "          6100,   709,    21,     5,  2443,    31,     5,  8948,    14,  9801,\n",
+      "           797,     9,  1425,   629,   115,    28,  8709, 19084,   396,     5,\n",
+      "           240,    13,    10,  5047,     4, 50118, 48148,     6,     5, 12093,\n",
+      "           168,    18,   708,    13,    41,   256,   306,  3500,   921,   198,\n",
+      "         13704,   342,  3425,  8793,    15,    99,    16,  6329,    10, 16920,\n",
+      "           537,     4, 50118, 38664,  3326, 17016, 24794, 18026,  9923,     5,\n",
+      "          5327,     2]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\n",
+      "         1, 1, 1, 1, 1, 1, 1, 1]])}\n"
+     ]
+    }
+   ],
+   "source": [
+    "tokens = tokenizer(\n",
+    "    document,\n",
+    "    max_length=512,\n",
+    "    truncation=True,\n",
+    "    padding=\"max_length\",\n",
+    "    return_tensors=\"pt\"\n",
+    ")\n",
+    "\n",
+    "print(tokens)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "78de2d73-3a72-4c59-856e-e2dd0c4b30f9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "They recorded their best result in Wales in 30 years, taking 11 out of 40 seats.\n",
+      "Among them was Gower, which was won by just 27 seats by the former detective Byron Davies, after more than a century in the hands of a succession of Labour MPs.\n",
+      "Jeremy Corbyn should have some fond memories as well.\n",
+      "His extraordinary rise in the summer from rank outsider to Labour leader was a reflection of the party's membership in Wales, as elsewhere.\n",
+      "The subsequent in-fighting in the party after Corbyn's victory could prove a real problem for Welsh Labour as it looks to hold on to power at the assembly next year.\n",
+      "In the meantime, the current Labour Welsh government completed its final full year.\n",
+      "And if there was an issue which dominated in Cardiff Bay, it was once again the state of the NHS.\n",
+      "Opposition parties maintained the pressure on waiting lists and the decision not to protect health spending between 2011 and 2013.\n",
+      "Labour ministers responded by pointing out that all was not rosy in the NHS in England and referring to its direct action such as putting Betsi Cadwaladr University Health Board into special measures.\n",
+      "It was a relatively quiet political year for education.  Although minister Huw Lewis suggested that Welsh GCSE results would overtake England, it failed to materialise as the results in Wales matched the previous year.\n",
+      "Public Services Minister Leighton Andrews failed to get agreement from opposition parties for council re-organisation, which largely recreates the structure that existed in the 1970s and 80s with eight or nine large councils.\n",
+      "Instead, he has ploughed on with legislation to pave the way for the next Welsh government to dramatically reduce the existing 22 councils soon after taking charge, but the big question remains unanswered: can there be political agreement?\n",
+      "David Cameron and Nick Clegg visited the Millennium Stadium for what was called the St David's Day agreement to devolve more powers over energy, transport and elections.\n",
+      "Labour insisted there had been no agreement, and remained cool to much that had been proposed.\n",
+      "This turned into hostility over Tory plans to simplify the constitutional settlement when the First Minister Carwyn Jones accused Welsh Secretary Stephen Crabb of putting devolution into reverse.\n",
+      "The other major constitutional development was the announcement from the Chancellor that partial control of income tax could be devolved without the need for a referendum.\n",
+      "Elsewhere, the Welsh government's plans for an M4 relief road around Newport put internal strain on what is normally a disciplined party.\n",
+      "Labour AM Jenny Rathbone criticised the proposals\n"
+     ]
+    }
+   ],
+   "source": [
+    "decoded = tokenizer.decode(\n",
+    "    tokens[\"input_ids\"][0],\n",
+    "    skip_special_tokens=True\n",
+    ")\n",
+    "\n",
+    "print(decoded)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7c7adadb-4823-4a2a-84aa-ff8e86606b70",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3.11 (BART Project)",
+   "language": "python",
+   "name": "venv"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

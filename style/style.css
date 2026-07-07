@@ -1,0 +1,189 @@
+/* ======================================================
+   GLOBAL
+====================================================== */
+
+.main {
+    background: #F8FAFC;
+}
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    max-width: 1300px;
+}
+
+/* ======================================================
+   HEADINGS
+====================================================== */
+
+h1 {
+    color: #2563EB;
+    font-weight: 700;
+}
+
+h2, h3 {
+    color: #1E293B;
+}
+
+/* ======================================================
+   HERO SECTION
+====================================================== */
+
+.hero {
+    background: linear-gradient(135deg, #2563EB, #4F46E5);
+    color: white;
+    padding: 35px;
+    border-radius: 18px;
+    margin-bottom: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(37,99,235,.20);
+}
+
+.hero h1 {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 18px;
+    opacity: .95;
+}
+
+/* ======================================================
+   BUTTONS
+====================================================== */
+
+.stButton > button {
+
+    width: 100%;
+    border-radius: 12px;
+
+    background: #2563EB;
+
+    color: white;
+
+    border: none;
+
+    height: 50px;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    transition: .3s;
+}
+
+.stButton > button:hover {
+
+    background: #1D4ED8;
+
+    transform: translateY(-2px);
+}
+
+/* ======================================================
+   TEXT AREA
+====================================================== */
+
+textarea {
+
+    border-radius: 12px !important;
+
+    border: 1px solid #CBD5E1 !important;
+
+}
+
+/* ======================================================
+   METRIC CARDS
+====================================================== */
+
+div[data-testid="metric-container"] {
+
+    background: white;
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    border: 1px solid #E2E8F0;
+
+    box-shadow: 0 3px 12px rgba(0,0,0,.05);
+
+}
+
+/* ======================================================
+   SIDEBAR
+====================================================== */
+
+section[data-testid="stSidebar"] {
+
+    background: #F1F5F9;
+
+}
+
+/* ======================================================
+   FILE UPLOADER
+====================================================== */
+
+div[data-testid="stFileUploader"] {
+
+    border-radius: 12px;
+
+    border: 2px dashed #2563EB;
+
+    padding: 12px;
+
+}
+
+/* ======================================================
+   DOWNLOAD BUTTON
+====================================================== */
+
+.stDownloadButton > button {
+
+    width: 100%;
+
+    border-radius: 12px;
+
+}
+
+/* ======================================================
+   EXPANDERS
+====================================================== */
+
+details {
+
+    border-radius: 10px;
+
+    border: 1px solid #E5E7EB;
+
+}
+
+/* ======================================================
+   FOOTER
+====================================================== */
+
+.footer {
+
+    text-align: center;
+
+    color: #64748B;
+
+    margin-top: 40px;
+
+    padding-top: 20px;
+
+}
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width:768px){
+
+.hero{
+
+padding:20px;
+
+}
+
+}
