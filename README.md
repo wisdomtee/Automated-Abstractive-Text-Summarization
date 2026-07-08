@@ -30,3 +30,7 @@ Clone the repository:
 ```bash
 git clone repository-url
 (Fix Streamlit deployment Python compatibility)
+
+
+https://automated-abstractive-text-summarization-jfss.onrender.com<img width="960" height="455" alt="Ai Text Summerizer" src="https://github.com/user-attachments/assets/1f2ab072-0817-404c-9a1e-526bb646775c" />
+
