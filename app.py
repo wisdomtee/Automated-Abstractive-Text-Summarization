@@ -280,6 +280,12 @@ if (
     and st.session_state.stats is not None
 ):
 
+if len(st.session_state.article) > 2000:
+    st.info(
+        "ℹ️ Your document exceeded the model's input limit and was automatically shortened before summarization."
+        
+        )
+
     summary = st.session_state.summary
     stats = st.session_state.stats
     processing_time = st.session_state.processing_time
@@ -380,34 +386,4 @@ if (
         use_container_width=True
     )
 
-    with chart2:
-
-        fig = compression_chart(
-
-            stats["compression"]
-
-        )
-
-        st.plotly_chart(
-
-            fig,
-
-            use_container_width=True
-
-        )
-
-    fig = reading_time_chart(
-
-        stats["original_reading_time"],
-
-        stats["summary_reading_time"]
-
-    )
-
-    st.plotly_chart(
-
-        fig,
-
-        use_container_width=True
-
-    )
+    
