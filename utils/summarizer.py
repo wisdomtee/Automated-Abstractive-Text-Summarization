@@ -52,7 +52,7 @@ def summarize_text(article, summary_length="Medium"):
 
     start = time.time()
 
-    try:
+        try:
 
         response = requests.post(
             API_URL,
@@ -71,7 +71,8 @@ def summarize_text(article, summary_length="Medium"):
                 "Too many requests. Please wait a few minutes."
             )
 
-        response.raise_for_status()
+        if not response.ok:
+            raise Exception(response.text)
 
         result = response.json()
 
