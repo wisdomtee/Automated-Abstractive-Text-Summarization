@@ -1,6 +1,6 @@
 streamlit==1.59.0
-huggingface_hub
-requests
+huggingface_hub==0.34.4
+requests==2.32.3
 PyPDF2==3.0.1
 python-docx==1.2.0
 plotly==6.8.0

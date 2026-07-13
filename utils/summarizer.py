@@ -10,9 +10,13 @@ def summarize_text(article, summary_length="Medium"):
     token = os.getenv("HF_TOKEN")
 
     if not token:
-        raise Exception("HF_TOKEN is missing from Render Environment Variables.")
+        raise Exception(
+            "HF_TOKEN is missing from Render Environment Variables."
+        )
 
-    if not article.strip():
+    article = article.strip()
+
+    if not article:
         return "", 0
 
     if summary_length == "Short":
@@ -28,7 +32,8 @@ def summarize_text(article, summary_length="Medium"):
         min_length = 70
 
     headers = {
-        "Authorization": f"Bearer {token}"
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
     }
 
     payload = {
@@ -42,32 +47,67 @@ def summarize_text(article, summary_length="Medium"):
 
     start = time.time()
 
-    response = requests.post(
-        API_URL,
-        headers=headers,
-        json=payload,
-        timeout=120
-    )
+    try:
 
-    if response.status_code == 503:
-        raise Exception(
-            "The AI model is loading. Please wait 20–30 seconds and try again."
+        response = requests.post(
+            API_URL,
+            headers=headers,
+            json=payload,
+            timeout=120
         )
 
-    if response.status_code == 429:
-        raise Exception(
-            "Too many requests. Please try again later."
+        if response.status_code == 401:
+            raise Exception(
+                "Invalid Hugging Face API token."
+            )
+
+        if response.status_code == 403:
+            raise Exception(
+                "Your Hugging Face token does not have permission to access this model."
+            )
+
+        if response.status_code == 429:
+            raise Exception(
+                "Rate limit exceeded. Please try again later."
+            )
+
+        if response.status_code == 503:
+            raise Exception(
+                "The AI model is loading. Please wait 20–30 seconds and try again."
+            )
+
+        if response.status_code != 200:
+            try:
+                error = response.json()
+            except Exception:
+                error = response.text
+
+            raise Exception(
+                f"Hugging Face API Error ({response.status_code}): {error}"
+            )
+
+        result = response.json()
+
+        if (
+            not isinstance(result, list)
+            or len(result) == 0
+            or "summary_text" not in result[0]
+        ):
+            raise Exception(
+                f"Unexpected API response: {result}"
+            )
+
+        summary = result[0]["summary_text"]
+
+        processing_time = round(
+            time.time() - start,
+            2
         )
 
-    response.raise_for_status()
+        return summary, processing_time
 
-    result = response.json()
-
-    summary = result[0]["summary_text"]
-
-    processing_time = round(time.time() - start, 2)
-
-    return summary, processing_time
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Network Error: {e}")
 
 
 def word_count(text):
@@ -79,6 +119,7 @@ def reading_time(words):
 
 
 def compression(original_words, summary_words):
+
     if original_words == 0:
         return 0
 
@@ -100,7 +141,8 @@ def generate_statistics(article, summary):
         "original_reading_time": reading_time(original),
         "summary_reading_time": reading_time(summarized),
         "time_saved": round(
-            reading_time(original) - reading_time(summarized),
+            reading_time(original)
+            - reading_time(summarized),
             2
         ),
     }
