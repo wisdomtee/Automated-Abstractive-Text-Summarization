@@ -1,13 +1,16 @@
 import os
 import time
-from huggingface_hub import InferenceClient
+import requests
 
-client = InferenceClient(
-    api_key=os.getenv("HF_TOKEN")
-)
+API_URL = "https://router.huggingface.co/hf-inference/models/sshleifer/distilbart-cnn-12-6"
 
 
 def summarize_text(article, summary_length="Medium"):
+
+    token = os.getenv("HF_TOKEN")
+
+    if not token:
+        raise Exception("HF_TOKEN is missing from Render Environment Variables.")
 
     if not article.strip():
         return "", 0
@@ -24,18 +27,47 @@ def summarize_text(article, summary_length="Medium"):
         max_length = 180
         min_length = 70
 
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    payload = {
+        "inputs": article,
+        "parameters": {
+            "max_new_tokens": max_length,
+            "min_new_tokens": min_length,
+            "do_sample": False
+        }
+    }
+
     start = time.time()
 
-    result = client.summarization(
-        article,
-        model="sshleifer/distilbart-cnn-12-6",
-        max_length=max_length,
-        min_length=min_length,
+    response = requests.post(
+        API_URL,
+        headers=headers,
+        json=payload,
+        timeout=120
     )
+
+    if response.status_code == 503:
+        raise Exception(
+            "The AI model is loading. Please wait 20–30 seconds and try again."
+        )
+
+    if response.status_code == 429:
+        raise Exception(
+            "Too many requests. Please try again later."
+        )
+
+    response.raise_for_status()
+
+    result = response.json()
+
+    summary = result[0]["summary_text"]
 
     processing_time = round(time.time() - start, 2)
 
-    return result.summary_text, processing_time
+    return summary, processing_time
 
 
 def word_count(text):
@@ -47,7 +79,6 @@ def reading_time(words):
 
 
 def compression(original_words, summary_words):
-
     if original_words == 0:
         return 0
 
