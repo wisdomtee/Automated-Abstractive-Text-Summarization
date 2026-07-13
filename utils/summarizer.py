@@ -1,20 +1,16 @@
 import os
 import time
-import requests
+from huggingface_hub import InferenceClient
 
-API_URL = "https://api-inference.huggingface.co/models/sshleifer/distilbart-cnn-12-6"
+client = InferenceClient(
+    api_key=os.getenv("HF_TOKEN")
+)
 
 
 def summarize_text(article, summary_length="Medium"):
 
-    token = os.getenv("HF_TOKEN")
-
-    if not token:
-        raise Exception("HF_TOKEN environment variable is not set.")
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+    if not article.strip():
+        return "", 0
 
     if summary_length == "Short":
         max_length = 60
@@ -28,43 +24,18 @@ def summarize_text(article, summary_length="Medium"):
         max_length = 180
         min_length = 70
 
-    payload = {
-        "inputs": article,
-        "parameters": {
-            "max_length": max_length,
-            "min_length": min_length,
-            "do_sample": False
-        }
-    }
-
     start = time.time()
 
-    response = requests.post(
-        API_URL,
-        headers=headers,
-        json=payload,
-        timeout=120
+    result = client.summarization(
+        article,
+        model="sshleifer/distilbart-cnn-12-6",
+        max_length=max_length,
+        min_length=min_length,
     )
-
-    if response.status_code == 503:
-        raise Exception(
-            "The AI model is loading. Please wait about 30 seconds and try again."
-        )
-
-    if response.status_code == 429:
-        raise Exception(
-            "Too many requests. Please try again in a few minutes."
-        )
-
-    response.raise_for_status()
-
-    result = response.json()
-
-    summary = result[0]["summary_text"]
 
     processing_time = round(time.time() - start, 2)
 
-    return summary, processing_time
+    return result.summary_text, processing_time
 
 
 def word_count(text):
@@ -100,5 +71,5 @@ def generate_statistics(article, summary):
         "time_saved": round(
             reading_time(original) - reading_time(summarized),
             2
-        )
+        ),
     }
