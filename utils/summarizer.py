@@ -19,16 +19,22 @@ def summarize_text(article, summary_length="Medium"):
     if not article:
         return "", 0
 
-    # Limit very long inputs
-    if len(article) > 4000:
-        article = article[:4000]
+    # Prevent sending documents that are too long
+    MAX_INPUT_CHARS = 2000
+
+    if len(article) > MAX_INPUT_CHARS:
+        raise Exception(
+            "The document is too long. Please keep it under about 2,000 characters."
+        )
 
     if summary_length == "Short":
         max_length = 60
         min_length = 20
+
     elif summary_length == "Medium":
         max_length = 120
         min_length = 40
+
     else:
         max_length = 180
         min_length = 70
@@ -40,8 +46,8 @@ def summarize_text(article, summary_length="Medium"):
     payload = {
         "inputs": article,
         "parameters": {
-            "max_new_tokens": max_length,
-            "min_new_tokens": min_length,
+            "max_length": max_length,
+            "min_length": min_length,
             "do_sample": False
         }
     }
@@ -59,7 +65,7 @@ def summarize_text(article, summary_length="Medium"):
 
         if response.status_code == 503:
             raise Exception(
-                "The AI model is loading. Please wait 30 seconds and try again."
+                "The AI model is loading. Please wait about 30 seconds and try again."
             )
 
         if response.status_code == 429:
@@ -67,7 +73,6 @@ def summarize_text(article, summary_length="Medium"):
                 "Too many requests. Please try again later."
             )
 
-        # Show the actual Hugging Face error
         if not response.ok:
             raise Exception(response.text)
 
@@ -95,7 +100,6 @@ def reading_time(words):
 
 
 def compression(original_words, summary_words):
-
     if original_words == 0:
         return 0
 
