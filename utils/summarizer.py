@@ -19,20 +19,16 @@ def summarize_text(article, summary_length="Medium"):
     if not article:
         return "", 0
 
-    # Safe input size for Hugging Face Inference API
-    MAX_INPUT_CHARS = 4000
-
-    if len(article) > MAX_INPUT_CHARS:
-        article = article[:MAX_INPUT_CHARS]
+    # Limit very long inputs
+    if len(article) > 4000:
+        article = article[:4000]
 
     if summary_length == "Short":
         max_length = 60
         min_length = 20
-
     elif summary_length == "Medium":
         max_length = 120
         min_length = 40
-
     else:
         max_length = 180
         min_length = 70
@@ -52,7 +48,7 @@ def summarize_text(article, summary_length="Medium"):
 
     start = time.time()
 
-        try:
+    try:
 
         response = requests.post(
             API_URL,
@@ -63,14 +59,15 @@ def summarize_text(article, summary_length="Medium"):
 
         if response.status_code == 503:
             raise Exception(
-                "The AI model is loading. Please wait about 30 seconds and try again."
+                "The AI model is loading. Please wait 30 seconds and try again."
             )
 
         if response.status_code == 429:
             raise Exception(
-                "Too many requests. Please wait a few minutes."
+                "Too many requests. Please try again later."
             )
 
+        # Show the actual Hugging Face error
         if not response.ok:
             raise Exception(response.text)
 
@@ -81,10 +78,7 @@ def summarize_text(article, summary_length="Medium"):
 
         summary = result[0]["summary_text"]
 
-        processing_time = round(
-            time.time() - start,
-            2
-        )
+        processing_time = round(time.time() - start, 2)
 
         return summary, processing_time
 
@@ -123,8 +117,7 @@ def generate_statistics(article, summary):
         "original_reading_time": reading_time(original),
         "summary_reading_time": reading_time(summarized),
         "time_saved": round(
-            reading_time(original) -
-            reading_time(summarized),
+            reading_time(original) - reading_time(summarized),
             2
         ),
     }
