@@ -1,6 +1,6 @@
 import time
 import streamlit as st
-from transformers import BartTokenizer, BartForConditionalGeneration
+from transformers import pipeline
 
 
 # -----------------------------------------------------
@@ -10,72 +10,59 @@ from transformers import BartTokenizer, BartForConditionalGeneration
 @st.cache_resource
 def load_model():
     """
-    Load the tokenizer and model only once.
+    Load the summarization pipeline only once.
     """
 
-    tokenizer = BartTokenizer.from_pretrained(
-        "facebook/bart-large-cnn"
+    summarizer = pipeline(
+        "summarization",
+        model="sshleifer/distilbart-cnn-12-6"
     )
 
-    model = BartForConditionalGeneration.from_pretrained(
-        "facebook/bart-large-cnn"
-    )
-
-    return tokenizer, model
+    return summarizer
 
 
 # -----------------------------------------------------
 # Generate Summary
 # -----------------------------------------------------
 
-def summarize_text(
-    article,
-    summary_length="Medium"
-):
+def summarize_text(article, summary_length="Medium"):
     """
-    Generate a summary using Facebook BART.
+    Generate a summary using DistilBART.
     """
 
-    tokenizer, model = load_model()
+    summarizer = load_model()
+
+    article = article.strip()
+
+    if not article:
+        return "", 0
 
     if summary_length == "Short":
-
         max_len = 60
         min_len = 20
 
     elif summary_length == "Medium":
-
         max_len = 120
         min_len = 40
 
     else:
-
         max_len = 180
         min_len = 70
 
     start_time = time.time()
 
-    inputs = tokenizer(
+    summary = summarizer(
         article,
-        return_tensors="pt",
-        max_length=1024,
-        truncation=True
-    )
-
-    summary_ids = model.generate(
-        inputs["input_ids"],
         max_length=max_len,
         min_length=min_len,
-        num_beams=4,
-        early_stopping=True
-    )
+        do_sample=False,
+        truncation=True
+    )[0]["summary_text"]
 
-    summary = tokenizer.decode(
-        summary_ids[0],
-        skip_special_tokens=True
+    processing_time = round(
+        time.time() - start_time,
+        2
     )
-
-    processing_time = time.time() - start_time
 
     return summary, processing_time
 
@@ -85,7 +72,6 @@ def summarize_text(
 # -----------------------------------------------------
 
 def word_count(text):
-
     return len(text.split())
 
 
@@ -112,10 +98,7 @@ def compression(original_words, summary_words):
         return 0
 
     return round(
-        (
-            (original_words - summary_words)
-            / original_words
-        ) * 100,
+        ((original_words - summary_words) / original_words) * 100,
         1
     )
 
