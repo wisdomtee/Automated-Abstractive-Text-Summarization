@@ -10,7 +10,8 @@ def summarize_text(article, summary_length="Medium"):
     token = os.getenv("HF_TOKEN")
 
     if not token:
-        raise Exception( "HF_TOKEN is missing from Render Environment Variables."
+        raise Exception(
+            "HF_TOKEN is missing from Render Environment Variables."
         )
 
     article = article.strip()
@@ -18,13 +19,13 @@ def summarize_text(article, summary_length="Medium"):
     if not article:
         return "", 0
 
-    # Prevent sending documents that are too long
+    # Limit very large documents
     MAX_INPUT_WORDS = 700
 
     words = article.split()
 
-if len(words) > MAX_INPUT_WORDS:
-    article = " ".join(words[:MAX_INPUT_WORDS])
+    if len(words) > MAX_INPUT_WORDS:
+        article = " ".join(words[:MAX_INPUT_WORDS])
 
     if summary_length == "Short":
         max_length = 60
@@ -77,7 +78,6 @@ if len(words) > MAX_INPUT_WORDS:
 
         result = response.json()
 
-        # Handle Hugging Face errors
         if isinstance(result, dict):
             raise Exception(result.get("error", str(result)))
 
