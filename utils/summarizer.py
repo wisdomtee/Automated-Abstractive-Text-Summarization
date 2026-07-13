@@ -10,31 +10,24 @@ def summarize_text(article, summary_length="Medium"):
     token = os.getenv("HF_TOKEN")
 
     if not token:
-        raise Exception(
-            "HF_TOKEN is missing from Render Environment Variables."
-        )
+        raise Exception("HF_TOKEN is missing from Render Environment Variables.")
 
     article = article.strip()
 
     if not article:
         return "", 0
 
-    # Limit very large documents
-    MAX_INPUT_WORDS = 700
-
+    # Limit input size
+    MAX_INPUT_WORDS = 400
     words = article.split()
-
-    if len(words) > MAX_INPUT_WORDS:
-        article = " ".join(words[:MAX_INPUT_WORDS])
+    article = " ".join(words[:MAX_INPUT_WORDS])
 
     if summary_length == "Short":
         max_length = 60
         min_length = 20
-
     elif summary_length == "Medium":
         max_length = 120
         min_length = 40
-
     else:
         max_length = 180
         min_length = 70
@@ -55,7 +48,6 @@ def summarize_text(article, summary_length="Medium"):
     start = time.time()
 
     try:
-
         response = requests.post(
             API_URL,
             headers=headers,
@@ -64,22 +56,22 @@ def summarize_text(article, summary_length="Medium"):
         )
 
         if response.status_code == 503:
-            raise Exception(
-                "The AI model is loading. Please wait about 30 seconds and try again."
-            )
+            raise Exception("The AI model is loading. Please wait about 30 seconds and try again.")
 
         if response.status_code == 429:
-            raise Exception(
-                "Too many requests. Please try again later."
-            )
+            raise Exception("Too many requests. Please try again later.")
 
         if not response.ok:
             raise Exception(response.text)
 
         result = response.json()
 
-        if isinstance(result, dict):
-            raise Exception(result.get("error", str(result)))
+        if isinstance(result, dict) and "error" in result:
+            if "index out of range" in result["error"].lower():
+                raise Exception(
+                    "The document is too long for the AI model. Please shorten it or upload a smaller document."
+                )
+            raise Exception(result["error"])
 
         if not isinstance(result, list):
             raise Exception("Unexpected response from Hugging Face API.")
@@ -88,14 +80,12 @@ def summarize_text(article, summary_length="Medium"):
             raise Exception("The model returned an empty response.")
 
         summary = result[0]["summary_text"]
-
         processing_time = round(time.time() - start, 2)
 
         return summary, processing_time
 
     except requests.exceptions.RequestException as e:
         raise Exception(f"Network Error: {e}")
-
 
 def word_count(text):
     return len(text.split())
