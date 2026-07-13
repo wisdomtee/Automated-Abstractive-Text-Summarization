@@ -19,6 +19,12 @@ def summarize_text(article, summary_length="Medium"):
     if not article:
         return "", 0
 
+    # Safe input size for Hugging Face Inference API
+    MAX_INPUT_CHARS = 4000
+
+    if len(article) > MAX_INPUT_CHARS:
+        article = article[:MAX_INPUT_CHARS]
+
     if summary_length == "Short":
         max_length = 60
         min_length = 20
@@ -32,8 +38,7 @@ def summarize_text(article, summary_length="Medium"):
         min_length = 70
 
     headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
+        "Authorization": f"Bearer {token}"
     }
 
     payload = {
@@ -56,46 +61,22 @@ def summarize_text(article, summary_length="Medium"):
             timeout=120
         )
 
-        if response.status_code == 401:
+        if response.status_code == 503:
             raise Exception(
-                "Invalid Hugging Face API token."
-            )
-
-        if response.status_code == 403:
-            raise Exception(
-                "Your Hugging Face token does not have permission to access this model."
+                "The AI model is loading. Please wait about 30 seconds and try again."
             )
 
         if response.status_code == 429:
             raise Exception(
-                "Rate limit exceeded. Please try again later."
+                "Too many requests. Please wait a few minutes."
             )
 
-        if response.status_code == 503:
-            raise Exception(
-                "The AI model is loading. Please wait 20–30 seconds and try again."
-            )
-
-        if response.status_code != 200:
-            try:
-                error = response.json()
-            except Exception:
-                error = response.text
-
-            raise Exception(
-                f"Hugging Face API Error ({response.status_code}): {error}"
-            )
+        response.raise_for_status()
 
         result = response.json()
 
-        if (
-            not isinstance(result, list)
-            or len(result) == 0
-            or "summary_text" not in result[0]
-        ):
-            raise Exception(
-                f"Unexpected API response: {result}"
-            )
+        if isinstance(result, dict) and "error" in result:
+            raise Exception(result["error"])
 
         summary = result[0]["summary_text"]
 
@@ -141,8 +122,8 @@ def generate_statistics(article, summary):
         "original_reading_time": reading_time(original),
         "summary_reading_time": reading_time(summarized),
         "time_saved": round(
-            reading_time(original)
-            - reading_time(summarized),
+            reading_time(original) -
+            reading_time(summarized),
             2
         ),
     }

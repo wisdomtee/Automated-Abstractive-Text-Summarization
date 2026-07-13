@@ -64,6 +64,12 @@ if "summary" not in st.session_state:
 if "article" not in st.session_state:
     st.session_state.article = ""
 
+if "stats" not in st.session_state:
+    st.session_state.stats = None
+
+if "processing_time" not in st.session_state:
+    st.session_state.processing_time = 0
+
 # ---------------------------------------------------
 # SIDEBAR
 # ---------------------------------------------------
@@ -250,12 +256,14 @@ if generate:
 
                 st.session_state.summary = summary
 
-                add_summary(
+                st.session_state.processing_time = processing_time
+
+                st.session_state.stats = generate_statistics(
                     article,
                     summary
                 )
 
-                stats = generate_statistics(
+                add_summary(
                     article,
                     summary
                 )
@@ -263,14 +271,18 @@ if generate:
         except Exception as e:
 
             st.error(f"An error occurred: {e}")
-
 # ---------------------------------------------------
 # DISPLAY SUMMARY
 # ---------------------------------------------------
 
-if st.session_state.summary != "":
+if (
+    st.session_state.summary != ""
+    and st.session_state.stats is not None
+):
 
     summary = st.session_state.summary
+    stats = st.session_state.stats
+    processing_time = st.session_state.processing_time
 
     summary_box.success(summary)
 
@@ -316,39 +328,18 @@ if st.session_state.summary != "":
 
     st.divider()
 
-# ---------------------------------------------------
-# DOWNLOAD
-# ---------------------------------------------------
-
     st.download_button(
-
         "📥 Download Summary",
-
         data=summary,
-
         file_name="summary.txt",
-
         mime="text/plain"
-
     )
-
-# ---------------------------------------------------
-# COPY BOX
-# ---------------------------------------------------
 
     st.text_area(
-
         "📋 Copy Summary",
-
         value=summary,
-
         height=180
-
     )
-
-# ---------------------------------------------------
-# CHARTS
-# ---------------------------------------------------
 
     st.divider()
 
@@ -359,20 +350,35 @@ if st.session_state.summary != "":
     with chart1:
 
         fig = word_count_chart(
-
             stats["original_words"],
-
             stats["summary_words"]
-
         )
 
         st.plotly_chart(
-
             fig,
-
             use_container_width=True
-
         )
+
+    with chart2:
+
+        fig = compression_chart(
+            stats["compression"]
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
+
+    fig = reading_time_chart(
+        stats["original_reading_time"],
+        stats["summary_reading_time"]
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
     with chart2:
 
