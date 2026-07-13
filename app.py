@@ -280,43 +280,47 @@ if (
     and st.session_state.stats is not None
 ):
 
-if len(st.session_state.article) > 2000:
-    st.info(
-        "ℹ️ Your document exceeded the model's input limit and was automatically shortened before summarization."
-        
+    if len(st.session_state.article) > 2000:
+        st.info(
+            "ℹ️ Your document exceeded the model's input limit and was automatically shortened before summarization."
         )
 
     summary = st.session_state.summary
     stats = st.session_state.stats
     processing_time = st.session_state.processing_time
 
-    summary_box.success(summary)
+    with right:
 
-    st.divider()
+        summary_box.success(summary)
 
-    st.subheader("📊 Summary Statistics")
+        st.divider()
 
-    c1, c2, c3, c4 = st.columns(4)
+        st.subheader("📊 Summary Statistics")
 
-    c1.metric(
-        "📄 Original Words",
-        stats["original_words"]
-    )
+        c1, c2, c3, c4 = st.columns(4)
 
-    c2.metric(
-        "📝 Summary Words",
-        stats["summary_words"]
-    )
+        c1.metric(
+            "📄 Original Words",
+            stats["original_words"]
+        )
 
-    c3.metric(
-        "📉 Compression",
-        f'{stats["compression"]}%'
-    )
+        c2.metric(
+            "📝 Summary Words",
+            stats["summary_words"]
+        )
 
-    c4.metric(
-        "⏱ Processing Time",
-        f"{processing_time:.2f}s"
-    )
+        c3.metric(
+            "📉 Compression",
+            f'{stats["compression"]}%'
+        )
+
+        c4.metric(
+            "⏱ Processing Time",
+            f"{processing_time:.2f}s"
+        )
+
+        # ...the rest of your statistics, charts,
+        # download button, etc., all remain indented here.
 
     st.divider()
 
